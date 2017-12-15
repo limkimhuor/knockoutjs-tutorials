@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script type='text/javascript' src='knockout-3.4.2.js'></script>
+  </head>
+  <body>
+    <p>First name: <input data-bind="value: firstName" /></p>
+    <p>Last name: <input data-bind="value: lastName" /></p>
+
+    <p>Full name: <span data-bind="text: fullName"></span></p>
+    <button data-bind="click: capitalizeLastName">Go caps</button>
+
+    <h2>Friends</h2>
+    <div data-bind="template: 'friendsTemplate'"></div>
+
+    <script id="friendsTemplate" type="text/html">
+      <ul>
+        {{each(index, friend) friends}}
+          <li>${ friend.name }</li>
+        {{/each}}
+      </ul>
+    </script>
+
+    <script type="text/javascript">
+    function friend(name) {
+      return {
+        name : ko.observable(name)
+      }
+
+    }
+      // var viewModel = {
+      //   firstName : ko.observable("Lim"),
+      //   lastName : ko.observable("Kimhuor"),
+      //   friends: ko.observableArray([new friend("Steve"), new friend("Annie")])
+      // };
+      // viewModel.fullName = ko.dependentObservable(function () {
+      //   return this.firstName() + " " + this.lastName();
+      // }, viewModel);
+      // ko.applyBindings(viewModel);
+
+      function AppViewModel() {
+        this.firstName = ko.observable("Bert");
+        this.lastName = ko.observable("Bertington");
+        this.fullName = ko.computed(function() {
+            return this.firstName() + " " + this.lastName();
+        }, this);
+        this.friends = ko.observableArray([new friend("Steve"), new friend("Annie")]);
+        this.capitalizeLastName = function() {
+        var currentVal = this.lastName();
+        this.lastName(currentVal.toUpperCase());
+    }
+      }
+
+      // Activates knockout.js
+      ko.applyBindings(new AppViewModel());
+    </script>
+  </body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script type='text/javascript' src='knockout-3.4.2.js'></script>
+  </head>
+  <body>
+    <p>FirstName: <input data-bind="value: firstName" /></p>
+    <p>LastName: <input data-bind="value: lastName" /></p>
+
+    <p>Fullname: <span data-bind="text: fullName"></span></p>
+
+    <h2>Friends: (<span data-bind="text: friends().length"></span>)</h2>
+    <ul data-bind="foreach: friends">
+      <li>
+        <input data-bind="value: name" />
+        <span><!--ko text: name--><!--/ko--></span>
+        <button data-bind="click: $root.removeFriend">Remove</button>
+
+        <label><input type="checkbox" data-bind="checked: isOnTwitter" /> Is on twitter</label>
+        <input data-bind="value: twitterName, visible: isOnTwitter" />
+      </li>
+    </ul>
+    <span data-bind="text: friends.slice()[0].name"></span>
+    <br>
+
+    <!-- <button type="button" data-bind="click: addFriend">Add friend</button> -->
+    <button type="button" data-bind="click: addFriend, enable: friends().length < 3">Add friend</button>
+
+    <textarea data-bind="value: ko.toJSON(friends)"></textarea>
+    <button data-bind="cick: save">Save</button>
+
+    <script type="text/javascript">
+      function friend(name) {
+        return {
+          name : ko.observable(name),
+          isOnTwitter: ko.observable(false),
+          twitterName: ko.observable()
+        };
+      }
+      function UserViewModel() {
+        var self = this;
+        self.firstName = ko.observable("Lim");
+        self.lastName = ko.observable("Kimhuor");
+        // self.fullName = ko.computed(function() {
+        //   return this.firstName() + " " + this.lastName();
+        // }, self);
+        self.fullName = ko.computed(function() {
+          return self.firstName() + " " + self.lastName();
+        });
+        //Forcing computed observables to always notify subscribers
+        /*
+        self.fullName = ko.computed(function() {
+          return self.firstName() + " " + self.lastName();
+        }).extend({ notify: 'always'});
+        */
+        //Delaying and/or suppressing change notifications
+        // self.fullName.extend({ rateLimit: 50 });  // Ensure updates no more than once per 50-millisecond period
+
+
+        // pureComputed
+        // self.fullName = ko.pureComputed(function() {
+        //   return this.firstName() + " " + this.lastName();
+        // }, this);
+
+        self.friends = ko.observableArray([new friend("Smit"), new friend("Annie")]);
+        self.addFriend = function() {
+          self.friends.push(new friend("Another"));
+        }
+        self.removeFriend = function(friend) {
+          self.friends.remove(friend)
+        }
+        // self.save = function() {
+        //   $.ajax({
+        //     url: "@Url.Action("Save")",
+        //     type: "post",
+        //     data: ko.toJSON(self),
+        //     contentType: "application/json",
+        //     success: function (result) {
+        //       alert(result.message)
+        //     }
+        //   })
+        // }
+        self.save = function() {
+          $.ajax("/friends", {
+            type: "post",
+            data: ko.toJSON({friends: self.friends }),
+            contentType: "application/json",
+            success: function (result) {
+              alert(result.message)
+            }
+          })
+        }
+      }
+      ko.applyBindings(new UserViewModel())
+    </script>
+  </body>
+</html>
